@@ -1,10 +1,5 @@
-# from  import turn_file_into_dataframe,col_names
 from extract.extract import turn_file_into_dataframe,col_names
 import pandas as pd
-
-import sys
-sys.path.insert(0, '/group-5-data-engineering-final-project')
-import extract
 
 def remove_columns_from_df(dataframe: pd.DataFrame, columns_to_drop: list) -> pd.DataFrame:
     dataframe.drop(columns_to_drop, axis=1, inplace=True)
