@@ -13,11 +13,34 @@ We will change this file multiple times throughout this article.
 
 Add the following in the docker-compose.yml file we just created:
 
-![Screenshot 2022-12-07 at 19 03 49](https://user-images.githubusercontent.com/113560228/206274280-2977147a-f8db-4909-b5b2-c7adf4bf0961.png)
+```yaml
+version: "3.1"
+services:
+  db:
+    image: postgres
+    container_name: demo
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "pass"
+    ports:
+      - 5432:5432
+    volumes:
+      - demo_db:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    container_name: adminer_container_demo
+    restart: always
+    ports:
+      - 8080:8080
+volumes:
+  demo_db:
+  ```
 
 We specified the name of our PostgreSQL container as demo and the Docker image to be used is postgres.
 
 The next thing we need to specify is the environment variables, i.e. the user, password, and database. If you don’t specify the user, by default it will be <b>root</b>.
+
+Volume is mounted at /var/lib/postgresql/data. Inside the container, this directory is where Postgres stores all the relevant tables and databases.
 
 Now, after creating the .yml file, we need to run the following command in the same directory where the .yml file is located:
 
