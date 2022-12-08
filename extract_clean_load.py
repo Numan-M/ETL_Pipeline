@@ -46,3 +46,4 @@ def remove_columns_from_df(
         print("dataframe does not contain specified columns")
 
 
+clean_dataframe = remove_columns_from_df(turn_file_into_dataframe(file_path,col_names),to_drop)
