@@ -11,7 +11,17 @@ def test_file_has_no_headers():
 def test_file_has_headers():
     file_path = "data/mockFileWithHeaders.csv"
     assert type(turn_file_into_dataframe(file_path)) == pd.DataFrame
-   
+
+#Reads correctly formatted TXT
+def test_file_is_txt_but_correct_data():
+    file_path = "data/mockFileWrongType.txt"
+    assert type(turn_file_into_dataframe(file_path)) == pd.DataFrame
+
+#Reads correctly formatted file with no extension
+def test_file_is_has_no_extension_but_correct_data():
+    file_path = "data/mockFileWrongType"
+    assert type(turn_file_into_dataframe(file_path)) == pd.DataFrame
+
 
 # #unhappy path
 
@@ -22,7 +32,9 @@ def test_file_missing():
   
 
 # #There is no file
-def test_file_missing():
-    file_path = "data/mockFileWrongType.txt"
-    assert type(turn_file_into_dataframe(file_path)) == FileNotFoundError
+def test_file_is_missing_SOME_headers():
+    file_path = "data/NoFile.csv"
+    assert type(turn_file_into_dataframe(file_path)) == Error
+
+   
   
