@@ -30,3 +30,20 @@ def turn_file_into_dataframe(
         print(f"There was no file at {file_path}")
         return e
 
+
+to_drop = ["customer_name", "card_number"]
+
+
+def remove_columns_from_df(
+    dataframe: pd.DataFrame, columns_to_drop: list
+) -> pd.DataFrame:
+
+    """Removes specified columns from a dataframe"""
+    try:
+        dataframe.drop(columns_to_drop, axis=1, inplace=True)
+        return dataframe
+    except:
+        print("dataframe does not contain specified columns")
+
+
+clean_dataframe = remove_columns_from_df(turn_file_into_dataframe(file_path,col_names),to_drop)
