@@ -28,8 +28,5 @@ def turn_file_into_dataframe(
         return dataframe
     except FileNotFoundError as e:
         print(f"There was no file at {file_path}")
-        # print(e)
         return e
 
-
-# print((type(turn_file_into_dataframe("data/mockFileWithMissingHeaders.csv", col_names))) == pd.DataFrame)
