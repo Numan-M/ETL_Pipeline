@@ -21,11 +21,14 @@ services:
     container_name: demo
     restart: always
     environment:
-      POSTGRES_PASSWORD: "pass"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: postgres
+      
     ports:
       - 5432:5432
     volumes:
-      - demo_db:/var/lib/postgresql/data
+      -  ./demo_db:/var/lib/postgresql/data
   adminer:
     image: adminer
     container_name: adminer_container_demo
@@ -33,7 +36,7 @@ services:
     ports:
       - 8080:8080
 volumes:
-  demo_db:
+  demo_db
   ```
 
 We specified the name of our PostgreSQL container as demo and the Docker image to be used is postgres.
