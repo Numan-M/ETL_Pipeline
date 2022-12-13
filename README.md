@@ -76,7 +76,7 @@ We have preempted some issues when extracting the data. For example:
 -We may receive a file with or without headers. 
 -We may receive a file with incorrect headers.
 
-As pet the diagram below, if the number of columns or the headers are wrong, the extraction fails and the script outputs an error. 
+As per the diagram below, if the number of columns or the headers are wrong, the extraction fails and the script outputs an error. 
 If the number of columns is right but there are no headers. The script outputs a warning, adds the headers and extracts the data and makes it available as a pandas dataframe.
 If the headers are present and correct, just extract the data and present it as a pandas dataframe.
 
