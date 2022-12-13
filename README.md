@@ -67,3 +67,23 @@ This will show the name of the container, command, and state of the container, w
 Now, we can go to our browser and go to localhost:8080 for Adminer. As Adminer runs on the same Docker network as PostgreSQL, it can access the Postgres container via port 5432 (or simply, by the container’s name).
 
 ![Screenshot 2022-12-07 at 19 41 37](https://user-images.githubusercontent.com/113560228/206280979-f1cfb886-e6a9-458e-abff-f5fd53bb4f9c.png)
+
+## Data extraction
+
+We have preempted some issues when extracting the data. For example:
+
+-We may receive a file with missing columns.
+-We may receive a file with or without headers. 
+-We may receive a file with incorrect headers.
+
+As pet the diagram below, if the number of columns or the headers are wrong, the extraction fails and the script outputs an error. 
+If the number of columns is right but there are no headers. The script outputs a warning, adds the headers and extracts the data and makes it available as a pandas dataframe.
+If the headers are present and correct, just extract the data and present it as a pandas dataframe.
+
+![DataInChecks drawio](https://user-images.githubusercontent.com/116560975/207384408-c7846e88-62be-4846-9258-e5805449943e.png)
+
+Furthermore, seven unit tests have been developed to ensure functionality does not break with updates.
+
+![image](https://user-images.githubusercontent.com/116560975/207386669-ed25ddb8-a9fe-4392-bb75-8558d8e84a56.png)
+
+
