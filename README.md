@@ -36,7 +36,7 @@ services:
     ports:
       - 8080:8080
 volumes:
-  demo_db
+  demo_db:
   ```
 
 We specified the name of our PostgreSQL container as demo and the Docker image to be used is postgres.
