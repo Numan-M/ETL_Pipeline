@@ -82,7 +82,7 @@ If the headers are present and correct, just extract the data and present it as 
 
 ![DataInChecks drawio](https://user-images.githubusercontent.com/116560975/207384408-c7846e88-62be-4846-9258-e5805449943e.png)
 
-Furthermore, seven unit tests have been developed to ensure functionality does not break with updates.
+Furthermore, seven unit tests have been developed to help minimize regression.
 
 ![image](https://user-images.githubusercontent.com/116560975/207386669-ed25ddb8-a9fe-4392-bb75-8558d8e84a56.png)
 
