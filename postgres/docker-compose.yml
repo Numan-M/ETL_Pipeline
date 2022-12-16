@@ -5,11 +5,14 @@ services:
     container_name: demo
     restart: always
     environment:
-      POSTGRES_PASSWORD: "pass"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: postgres
+      
     ports:
       - 5432:5432
     volumes:
-      - demo_db:/var/lib/postgresql/data
+      -  ./demo_db:/var/lib/postgresql/data
   adminer:
     image: adminer
     container_name: adminer_container_demo
