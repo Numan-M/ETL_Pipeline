@@ -1,60 +1,61 @@
 import psycopg2
-from connect_to_db import connecting_to_db
+
+from src.connecting import connecting_to_db
 
 
+# def create_table(conn,query):
+#     cursor = conn.cursor()
+
+#     cursor.execute(query)
 
 
-def create_table(conn,query):
-    cursor = conn.cursor()
-    
-    cursor.execute(query)
-
-
-script_store ='''CREATE TABLE IF NOT EXISTS stores(
-    store_id SERIAL PRIMARY KEY,
+query_store = """CREATE TABLE IF NOT EXISTS stores(
+    store_id SERIAL PRIMARY KEY NOT NULL,
     store_name VARCHAR(100) UNIQUE NOT NULL
- 
-    );'''
+    );"""
 
-script_payment = '''CREATE TABLE IF NOT EXISTS payment_methods(
-    payment_id SERIAL PRIMARY KEY,
+script_payment = """CREATE TABLE IF NOT EXISTS payment_methods(
+    payment_id SERIAL PRIMARY KEY NOT NULL,
     payment_method VARCHAR(100)  UNIQUE NOT NULL
-    );'''
-    
+    );"""
 
-query_transaction = '''CREATE TABLE IF NOT EXISTS transactions (
-    transaction_id SERIAL PRIMARY KEY,
-    store_id INT,
-    timestamp TIMESTAMP NOT NULL,
-    total_price MONEY  NOT NULL,
-    FOREIGN KEY(store_id)
-    REFERENCES stores(store_id)
 
-    
-    );'''
-
-query_products = '''CREATE TABLE IF NOT EXISTS products(
-    product_id SERIAL NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
-    store_name VARCHAR(100) NOT NULL,
-    size VARCHAR(100) NOT NULL,
-    product_type VARCHAR (100) NOT NULL,
+query_products = """CREATE TABLE IF NOT EXISTS products(
+    product_id SERIAL PRIMARY KEY NOT NULL,
+    product_name VARCHAR(200) UNIQUE NOT NULL,
     price MONEY NOT NULL
-    );'''
+    );"""
 
-alter_t='''UPDATE transactions
-SET store_id = stores.store_id
-FROM stores
-WHERE transactions.store_id is null;'''
-
-alter_t1='''UPDATE transactions
-SET payment_id = payment_methods.payment_id
-FROM payment_methods
-WHERE transactions.payment_id is null;'''
+query_basket = """CREATE TABLE IF NOT EXISTS basket(
+    basket_id INT not NULL,
+    product_id INT not null);"""
 
 
+transaction = """CREATE TABLE IF NOT EXISTS transaction(
+    transaction_id SERIAL NOT NULL,
+    store_id INT  NOT NULL ,
+    basket_id INT NOT NULL,
+    payment_id INT NOT NULL NOT NULL,
+    timestamp timestamp not null,
+    total_price MONEY NOT NULL,
+    CONSTRAINT pk_transactions PRIMARY KEY (
+        transaction_id)
 
-#select * from stores join transactions on transactions.store_id = stores.store_id
+
+    );"""
+
+alter_transaction_storeid = """ALTER TABLE transaction
+                        ADD CONSTRAINT fk_transactions_store_id FOREIGN KEY(store_id) REFERENCES stores(store_id);"""
+
+alter_transaction_paymentid = """ALTER TABLE transaction
+                        ADD CONSTRAINT fk_transactions_payment_method_id FOREIGN KEY(payment_id) REFERENCES payment_methods (payment_id);"""
+alter_transaction_basekttid = """ALTER TABLE transaction
+                        ADD CONSTRAINT fk_transactions_basekt_id FOREIGN KEY(basket_id) REFERENCES basket(basket_id);"""
+# ALTER TABLE "Transactions" ADD CONSTRAINT "fk_Transactions_payment_method_id" FOREIGN KEY("payment_method_id")
+# REFERENCES "Payment_method" ("payment_method_id");
+
+
+# select * from stores join transactions on transactions.store_id = stores.store_id
 
 # query_orders = '''CREATE TABLE IF NOT EXIST orders (
 #     "order_id" SERIAL NOT NULL,
@@ -62,7 +63,7 @@ WHERE transactions.payment_id is null;'''
 #     "product_id" INT NOT NULL,
 #     CONSTRAINT pk_Orders
 #      PRIMARY KEY order_id
-     
+
 # );'''
 
 # query_stores = '''CREATE TABLE "Stores" (
@@ -70,7 +71,7 @@ WHERE transactions.payment_id is null;'''
 #     "store_name" VARCHAR(100)   NOT NULL,
 #     CONSTRAINT pk_Stores
 #     PRIMARY KEY store_id
-    
+
 # );'''
 
 # query_products = '''CREATE TABLE Products (
@@ -81,7 +82,7 @@ WHERE transactions.payment_id is null;'''
 #     CONSTRAINT pk_Products
 #     PRIMARY KEY  product_id
 
-    
+
 # );'''
 
 # query_flavours = '''CREATE TABLE Flavours (
@@ -106,7 +107,7 @@ WHERE transactions.payment_id is null;'''
 #     )
 # );'''
 
- 
+
 # '''ALTER TABLE Transactions ADD CONSTRAINT fk_Transactions_store_id FOREIGN KEY(store_id)
 # REFERENCES Stores (store_id);'''
 
@@ -121,4 +122,3 @@ WHERE transactions.payment_id is null;'''
 
 # ALTER TABLE "Products" ADD CONSTRAINT "fk_Products_flavour_id" FOREIGN KEY("flavour_id")
 # REFERENCES "Flavours" ("flavour_id");
-
