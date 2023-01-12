@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: >
-  Template to deploy ETL.
+Description: Template to deploy ETL.
 
 Resources:
   LambdaFunctionRole:
@@ -28,6 +27,16 @@ Resources:
               - logs:CreateLogStream
               - logs:PutLogEvents
             Resource: '*'
+      - PolicyName: s3ListAccessPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+                - s3:ListObjects
+                - s3:ListBucket
+                - s3:GetObject
+            Resource: '*' #REVISE THIS. IT SHOULD ONLY BE THE RELEVANT BUCKET
 
   LambdaFunction:
     Type: AWS::Lambda::Function
@@ -40,6 +49,7 @@ Resources:
         - arn:aws:lambda:eu-west-1:336392948345:layer:AWSSDKPandas-Python39:2
         #may need to add further layers with all the dependencies
       Code:
+      #Replace code under zipfile with our code.
         ZipFile: |
           import logging
           LOGGER = logging.getLogger()
@@ -48,19 +58,22 @@ Resources:
             LOGGER.info(f'Event structure: {event}')
 
   S3Bucket:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     Properties:
-      BucketName: delon8-group5
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: s3:ObjectCreated:*
-            Function: !GetAtt LambdaFunction.Arn
+      BucketName: stackbucketg5
+#THESE 4 LINES ARE TO BE COMMENTED THE FIRST TIME AROUND CREATING THE STACK
+#THEN UNCOMMENTS UPDATE THE TEMPLATE IN THE TEMPLATE BUCKET
+#THEN UPDATE THE STACK
+      # NotificationConfiguration:
+      #   LambdaConfigurations:
+      #     - Event: s3:ObjectCreated:*
+      #       Function: !GetAtt LambdaFunction.Arn
 
   S3BucketPermission:
     Type: AWS::Lambda::Permission
     Properties: 
       Action: lambda:InvokeFunction
-      FunctionName: !Ref LambdaFunction
+      FunctionName: !GetAtt LambdaFunction.Arn
       Principal: s3.amazonaws.com
       SourceArn: !GetAtt S3Bucket.Arn
 

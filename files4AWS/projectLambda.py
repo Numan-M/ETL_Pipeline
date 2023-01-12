@@ -3,6 +3,8 @@ import boto3
 import csv
 import pandas as pd
 import redshift_connector
+import StringIO
+
 
 from io import StringIO
 
@@ -22,10 +24,25 @@ col_names = [
 bucket_name = 'stackbucketg5'
 s3_client = boto3.client("s3", endpoint_url="https://s3.eu-west-1.amazonaws.com")
 
+class HeadersWrongError(Exception):
+    """A custom error class in case we are importing a file
+    with the wrong headers"""
+
+    pass
+
+class ColumnsWrongError(Exception):
+    
+    """A custom error class in case we are importing a file
+    with more or less columns than there should be"""
+
+    pass
+
+
+
 def handler(event, context):
     
     
-    def check_if_number_of_columns_right(bucket_name: str, expected_cols: list, object_key: str)-> bool:
+    def check_if_number_of_columns_right(bucket_name: str, object_key: str, expected_cols: list)-> bool:
 
         """This function takes a path to the file and a list with headers
         checks if the file has the same number of columns as the list of headers.
@@ -37,8 +54,26 @@ def handler(event, context):
         data = s3_object.get()['Body'].read().decode('utf-8').splitlines()
 
         return len(list(csv.reader(data))) == len(expected_cols)
+    
+    
+        
+    def check_headers_match_expected(
+        bucket_name: str, object_key: str, expected_col_names: list = col_names
+    ) -> bool:
 
-  
+        """This function takes in a file through file_path and expected column headers and outputs
+        a Boolean True if all expected headers are present and are in the right order,
+        or False if there are missing headers"""
+
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        df_s3_data = pd.read_csv(response['Body'], sep=',')
+
+        actual_column_names = list(df_s3_data.columns)
+        return actual_column_names == expected_col_names
+    
+
+
+
     def collect_names_of_files_in_bucket(bucket_name : str) -> list:
         response = s3_client.list_objects_v2(Bucket=bucket_name)
         content_list = response["Contents"]
@@ -49,12 +84,57 @@ def handler(event, context):
         return object_key_list
 
 #This version assumes there are no headers in the CSV files
-    def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
+    # def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
+    #     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+    #     df_s3_data = pd.read_csv(response['Body'], sep=',', names=col_names)
+    #     return df_s3_data
+
+    def check_if_headers_present(bucket_name, object_key)-> bool:
+        
+        """This function takes a path to the file and checks
+        if the file has headers at all. Returns True if it does
+        and false if it does not"""
+
+        # s3 = boto3.resource('s3')
+        # obj = s3.Object(bucket_name, object_key)
+        # csvfile = obj.get()['Body'].read().decode('utf-8') 
+        #         # response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        # # csvfile = response['Body'].decode("utf-8") 
+        
         response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-        df_s3_data = pd.read_csv(response['Body'], sep=',', names=col_names)
-        return df_s3_data
+        dataframe = pd.read_csv(response['Body'], sep=',')
+        buffer = StringIO.StringIO()
+        dataframe.to_csv(buffer) 
+        sniffer = csv.Sniffer()
+        has_header = sniffer.has_header(buffer.read(2048))
+        return has_header
 
 
+
+
+    def turn_file_into_dataframe(
+        bucket_name, object_key, col_names: list = col_names
+    ) -> pd.DataFrame:
+
+        """This function takes in a file through a file_path and column headers that default to
+        a value, in case the file has no headers and returns a dataframe with the headers provided
+        , or errors  """
+
+        try:
+            if not check_if_number_of_columns_right(bucket_name, object_key, col_names):
+                raise ColumnsWrongError("The number of columns in the file does not match the number of columns expected")
+            
+            elif not check_if_headers_present(bucket_name, object_key) or check_headers_match_expected(bucket_name, object_key, col_names):
+                response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+                dataframe = pd.read_csv(response['Body'], sep=',', names=col_names)
+                return dataframe
+            
+            else: #this happens if the number of columns is right and there are headers but they do not match our expected headers
+                raise HeadersWrongError("The headers in the data do not match the expected headers")
+        except ColumnsWrongError as error:
+            return error
+        except HeadersWrongError as error:
+            return error
     
     def splitting_products_column(df):
         df['products'] = df['products'].str.split(', ')
@@ -189,7 +269,9 @@ def handler(event, context):
     
     
     for object_key in list_of_files:
-        
+        print(f"Headers for {object_key} are as expected",  check_headers_match_expected(bucket_name, object_key, col_names))
+        print(f"Headers for {object_key} are present is", check_if_headers_present(bucket_name, object_key))
+
         
     #     # """Creating dataframes for each table"""
         df = turn_file_into_dataframe(bucket_name,object_key, col_names)
@@ -221,7 +303,7 @@ def handler(event, context):
     # insert_values_in_table(connecting_to_db,clean_df_store,'stores')
     # insert_values_in_table(connecting_to_db,clean_df_payment,'payment_methods')
     # insert_values_in_table(connecting_to_db,clean_df_products,'products')
-    insert_values_in_table(connecting_to_db,clean_df_transaction,'transactions')
+    #insert_values_in_table(connecting_to_db,clean_df_transaction,'transactions')
 
     
 
