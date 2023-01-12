@@ -154,3 +154,4 @@ sales_table = foreign_key_cols(
 sales_table["customer_basket_id"] = sales_table.index + 1
 sales_table.drop(["product_name"], axis=1, inplace=True)
 sales_table = sales_table[["customer_basket_id", "product_id"]]
+sales_table = sales_table.convert_dtypes()

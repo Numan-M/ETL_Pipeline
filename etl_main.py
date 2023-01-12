@@ -2,35 +2,41 @@ import pandas as pd
 import psycopg2
 import psycopg2.extras as extras
 
-from src.cleansing_data import basket_table
-from src.cleansing_data import payment_methods_table
-from src.cleansing_data import products_table
-from src.cleansing_data import store_table
-from src.cleansing_data import transaction_table
 from src.connecting import connecting_to_db
-from src.creating_tables import alter_transaction_paymentid
-from src.creating_tables import alter_transaction_storeid
-from src.creating_tables import query_basket
+from src.creating_tables import alter_customer_basket_paymentid
+from src.creating_tables import alter_customer_basket_storeid
+from src.creating_tables import alter_sales_customer_basket_id
+from src.creating_tables import alter_sales_product_id
+from src.creating_tables import query_customer_basket
+from src.creating_tables import query_payment
 from src.creating_tables import query_products
+from src.creating_tables import query_sales
 from src.creating_tables import query_store
-from src.creating_tables import script_payment
-from src.creating_tables import transaction
+from src.g5_lambda_1 import customer_basket_table
+from src.g5_lambda_1 import payment_methods_table
+from src.g5_lambda_1 import products_table
+from src.g5_lambda_1 import sales_table
+from src.g5_lambda_1 import store_name_table
 
 
 def main():
     create_table(connecting_to_db, query_store)
-    create_table(connecting_to_db, script_payment)
+    create_table(connecting_to_db, query_payment)
     create_table(connecting_to_db, query_products)
-    create_table(connecting_to_db, query_basket)
-    create_table(connecting_to_db, transaction)
-    alter_table(connecting_to_db, alter_transaction_storeid)
-    alter_table(connecting_to_db, alter_transaction_paymentid)
+    create_table(connecting_to_db, query_customer_basket)
+    create_table(connecting_to_db, query_sales)
 
-    insert_values_in_table(connecting_to_db, store_table, "stores")
+    alter_table(connecting_to_db, alter_customer_basket_storeid)
+    alter_table(connecting_to_db, alter_customer_basket_paymentid)
+
+    alter_table(connecting_to_db, alter_sales_customer_basket_id)
+    alter_table(connecting_to_db, alter_sales_product_id)
+
+    insert_values_in_table(connecting_to_db, store_name_table, "stores")
     insert_values_in_table(connecting_to_db, payment_methods_table, "payment_methods")
     insert_values_in_table(connecting_to_db, products_table, "products")
-    insert_values_in_table(connecting_to_db, basket_table, "basket")
-    insert_values_in_table(connecting_to_db, transaction_table, "transaction")
+    insert_values_in_table(connecting_to_db, customer_basket_table, "customer_basket")
+    insert_values_in_table(connecting_to_db, sales_table, "sales")
 
 
 def create_table(conn, query):
