@@ -76,11 +76,13 @@ def insert_values_in_table(connection, df, table_used):
         extras.execute_values(cursor, query, tuples)
 
         connection.commit()
+        print("the dataframe is inserted")
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
     finally:
-        print("the dataframe is inserted")
+
+        connection.close()
 
 
 if __name__ == "__main__":
