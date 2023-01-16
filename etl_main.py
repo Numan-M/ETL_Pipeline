@@ -20,17 +20,17 @@ from src.g5_lambda_1 import store_name_table
 
 
 def main():
-    create_table(connecting_to_db, query_store)
-    create_table(connecting_to_db, query_payment)
-    create_table(connecting_to_db, query_products)
-    create_table(connecting_to_db, query_customer_basket)
-    create_table(connecting_to_db, query_sales)
+    run_query(connecting_to_db, query_store)
+    run_query(connecting_to_db, query_payment)
+    run_query(connecting_to_db, query_products)
+    run_query(connecting_to_db, query_customer_basket)
+    run_query(connecting_to_db, query_sales)
 
-    alter_table(connecting_to_db, alter_customer_basket_storeid)
-    alter_table(connecting_to_db, alter_customer_basket_paymentid)
+    run_query(connecting_to_db, alter_customer_basket_storeid)
+    run_query(connecting_to_db, alter_customer_basket_paymentid)
 
-    alter_table(connecting_to_db, alter_sales_customer_basket_id)
-    alter_table(connecting_to_db, alter_sales_product_id)
+    run_query(connecting_to_db, alter_sales_customer_basket_id)
+    run_query(connecting_to_db, alter_sales_product_id)
 
     insert_values_in_table(connecting_to_db, store_name_table, "stores")
     insert_values_in_table(connecting_to_db, payment_methods_table, "payment_methods")
@@ -39,26 +39,16 @@ def main():
     insert_values_in_table(connecting_to_db, sales_table, "sales")
 
 
-def create_table(conn, query):
+def run_query(conn, query):
     try:
 
         cursor = conn.cursor()
 
         cursor.execute(query)
-        print("tables made")
-    except:
-        print("no tables made")
-
-
-def alter_table(conn, alter_query):
-    try:
-
-        cursor = conn.cursor()
-
-        cursor.execute(alter_query)
-        print("tables alter")
-    except:
-        print("no tables alter")
+        print(f"Successfully run query: {query} ")
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(f"Following query failed {query}")
+        print(error)
 
 
 def insert_values_in_table(connection, df, table_used):

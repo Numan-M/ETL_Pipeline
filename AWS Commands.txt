@@ -1,0 +1,42 @@
+
+
+MAKE BUCKET
+
+aws s3 mb s3://g5-test-deploy --region eu-west-1
+
+
+COPY TEMPLATE (or any file) TO BUCKET
+
+
+aws s3 cp cloudformationinfrastructure.yaml s3://g5-test-deploy/templates/cloudformationinfrastructure.yaml
+
+
+MAKE STACK FROM TEMPLATE (IF THE STACKS HAS A NOTIFICATION ATTACHED TO A BUCKET, THIS IS A MULTISTEP PROCESS
+1. CREATE STACK WITH NOTIFICATION COMMENTED OUT
+2. UNCOMMENT NOTIFICATION CODE
+3. UPDATE YAML IN THE TEMPLATE BUCKET
+4. UPDATE THE STACK USING THE UPDATED TEMPLATE
+
+aws cloudformation create-stack --stack-name <STACKNAME> --template-url https://<BUCKET NAME>.s3.eu-west-1.amazonaws.com/templates/<TEMPLATENAME> --region eu-west-1 --capabilities CAPABILITY_IAM  --disable-rollback
+
+
+
+aws cloudformation create-stack --stack-name g5-infrast-stack3 --template-url https://g5-test-deploy2.s3.eu-west-1.amazonaws.com/templates/cloudformationinfrastructure.yaml --region eu-west-1 --capabilities CAPABILITY_IAM --disable-rollback
+
+DELETE STACK
+
+aws cloudformation delete-stack --stack-name my-stack
+
+aws cloudformation delete-stack --stack-name g5-infrast-stack3
+
+
+UPDATE STACK
+
+aws cloudformation update-stack --stack-name g5-infrast-stack3    --template-url https://g5-test-deploy2.s3.eu-west-1.amazonaws.com/templates/cloudformationinfrastructure.yaml
+
+aws cloudformation update-stack --stack-name mystack --template-url https://s3.amazonaws.com/sample/updated.template
+
+
+REMOVE BUCKET
+
+$ aws s3 rb s3://stackbucketg5 --force

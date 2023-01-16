@@ -1,5 +1,8 @@
 import csv
 import logging
+from datetime import date
+from datetime import datetime
+from datetime import timedelta
 from io import StringIO
 
 import boto3
@@ -19,7 +22,7 @@ col_names = [
 ]
 
 
-bucket_name = "stackbucketg5"
+bucket_name = "delon8-group5"
 s3_client = boto3.client("s3", endpoint_url="https://s3.eu-west-1.amazonaws.com")
 
 
@@ -68,8 +71,13 @@ def handler(event, context):
         actual_column_names = list(df_s3_data.columns)
         return actual_column_names == expected_col_names
 
+    yesterday = datetime.now() - timedelta(1)
+    yesterday = str(yesterday)[0:10]
+    yesterday = yesterday.replace("-", "/")
+    yesterday = yesterday.replace("/0", "/")
+
     def collect_names_of_files_in_bucket(bucket_name: str) -> list:
-        response = s3_client.list_objects_v2(Bucket=bucket_name)
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
         content_list = response["Contents"]
         object_key_list = []
         for s3_object in content_list:
@@ -78,10 +86,10 @@ def handler(event, context):
         return object_key_list
 
     # This version assumes there are no headers in the CSV files
-    # def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
-    #     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-    #     df_s3_data = pd.read_csv(response['Body'], sep=',', names=col_names)
-    #     return df_s3_data
+    def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        df_s3_data = pd.read_csv(response["Body"], sep=",", names=col_names)
+        return df_s3_data
 
     def check_if_headers_present(bucket_name, object_key) -> bool:
 
