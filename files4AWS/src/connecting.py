@@ -9,7 +9,7 @@ def connect_to_database(connection_details):
     """
     try:
         print("connecting")
-        conn = redshift_connector.connect(**connection_details)
+        connection = redshift_connector.connect(**connection_details)
         print("Connection done")
     except Exception as e:
         print(e)

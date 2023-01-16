@@ -12,6 +12,8 @@ from connecting import connection
 bucket_name = "delon8-group5"
 s3_client = boto3.client("s3", endpoint_url="https://s3.eu-west-1.amazonaws.com")
 
+##ADDED BY ARAM
+
 
 def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
 
@@ -53,6 +55,9 @@ def log_filename(object_key, connection_to_db):
     cursor.execute(query_to_insert_file_name)
     connection_to_db.commit()
     print(f"File '{object_key}' has been processed")
+
+
+##FINISH ADDED BY ARAM
 
 
 def remove_columns_from_df(
@@ -158,6 +163,7 @@ products_table = pd.DataFrame(
     columns=["product_name", "price"],
 )
 
+
 # 4. Creating a customer_basket_table
 store_FK = foreign_key_dict(clean_df, "store_name")
 payment_method_FK = foreign_key_dict(clean_df, "payment_method")
@@ -178,6 +184,7 @@ customer_basket_table_cols = [
     "total_price",
 ]
 customer_basket_table = customer_basket_table[customer_basket_table_cols]
+
 
 # 5. Creating a sales df
 product_id_FK_condition = foreign_key_dict(clean_split_df, "product_name")

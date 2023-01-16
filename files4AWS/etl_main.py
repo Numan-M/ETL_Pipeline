@@ -45,7 +45,7 @@ def run_query(conn, query):
         cursor.execute(query)
         print(f"Successfully run query: {query} ")
 
-    except (Exception, psycopg2.DatabaseError) as error:
+    except (Exception, redshift_connector.DatabaseError) as error:
         print(f"Following query failed {query}")
         print(error)
 
@@ -54,23 +54,23 @@ def insert_values_in_table(connection, df, table_used):
     """Loading data into DB"""
 
     tuples = [tuple(x) for x in df.to_numpy()]
+    values_to_enter = str(tuples).strip("[]").replace(",)", ")")
 
     columns = ",".join(list(df.columns))
 
-    query = f"INSERT INTO {table_used}({columns}) VALUES %s"
+    query = f"INSERT INTO public.{table_used} ({columns}) VALUES {values_to_enter};"
     """--> INSERT INTO payment_methods(payment_method) VALUES ('CARD'),..."""
 
     cursor = connection.cursor()
     try:
-        extras.execute_values(cursor, query, tuples)
-
+        cursor.execute(query)
         connection.commit()
         print("the dataframe is inserted")
-    except (Exception, psycopg2.DatabaseError) as error:
+
+    except (Exception, redshift_connector.DatabaseError) as error:
         print(error)
 
     finally:
-
         connection.close()
 
 
