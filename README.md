@@ -12,7 +12,8 @@
         <li>
         <a href="#proof-of-concept">Proof of Concept</a>
           <ul>
-            <li><a href="#setup-docker-for-postgresql-and-adminer">Setup docker for PostgreSQL and Adminer</a></li>
+            <li><a href="#setting-up-docker-for-postgresql-and-adminer">Setting up docker for PostgreSQL and Adminer</a></li>
+            <li><a href="#data-normalisation-and-schema">Data Normalisation and Schema</a></li>
             <li><a href="#data-extraction">Data Extraction</a></li>
           </ul>
         <li><a href="">
@@ -27,7 +28,7 @@
         <li><a href="#week-one-%2D-setup-proof-of-concept-etl-pipeline">Week One - Setup proof of concept ETL pipeline</a></li>
         <li><a href="#week-two-%2D-move-etl-pipeline-to-the-cloud">Week Two - Move ETL pipeline to the cloud</a></li>
         <li><a href="#week-three-%2D-setup-grafana">Week Three - Setup Grafana</a></li>
-        <li><a href="#future-plans">Setup Grafana</a></li>
+        <li><a href="#future-plans">Future Plans</a></li>
         </ul>
       </li>
     <li><a href="#contributing">Contributing</a></li>
@@ -58,8 +59,9 @@ Following discussion with the client, we agreed upon the following:
 
 
 ### **Design Choices**
+ - Insert information that needs to go here
 ### **Proof of Concept**
-#### **Setup docker for PostgreSQL and Adminer**
+#### **Setting up docker for PostgreSQL and Adminer**
 Let’s create a directory, postgres, and then create a docker-compose.yml file in that directory:
 
 ```bash
@@ -129,7 +131,50 @@ Now, we can go to our browser and go to localhost:8080 for Adminer. As Adminer r
 
 ![Screenshot 2022-12-07 at 19 41 37](https://user-images.githubusercontent.com/113560228/206280979-f1cfb886-e6a9-458e-abff-f5fd53bb4f9c.png)
 
-## **Data Extraction**
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### **Data Normalisation and Schema**
+We first needed took a look at a CSV from the company to decide on what tables we needed. The data was normalised to Third Normal Form and checked with our project owner/technical lead. Through the normalisation process, we also identified relationships that would need to exist in order for the data to be queryable.
+
+**Resulting tables:**
+
+**NB:** asterisk(*) = primary key; *italics* = foreign key
+
+
+- **Transactions** 
+  | transaction_id* | timestamp | *store_id* | total_price | *payment_method_id*
+  | ----------- | ----------- |----------- | ----------- |----------- |
+  | 1 | 25/08/2021 09:00:00 | 1 |  2.45| 1 |
+  | 1 | 25/08/2021 09:02:00 | 1 |  7.95| 1 |
+- **Payment_method**
+  | payment_method_id* | payment_method |
+  | ----------- | ----------- |
+  | 1 | CARD |
+  | 2 | CASH |
+- **Stores**
+  | store_id* | store_name |
+  | ----------- | ----------- |
+  | 1 | Chesterfield |
+  | 2 | Uppingham |
+- **Products**
+  | product_id* | product_name | price |
+  | ----------- | ----------- | ----------- |
+  | 1 | Regular Latte | 2.45|
+  | 2 | Large Flavoured Latte - Hazelnut | 2.75|
+- **Baskets** 
+  | basket_id* | *transaction_id* | *product_id* |
+  | ----------- | ----------- | ----------- |
+  | 1 | 1 | 1|
+  | 2 | 2 | 1 |
+  | 2 | 2 | 1 |
+
+We discussed breaking down the products table further, into separate size, type and flavour columns, however after considering the impact such a breakdown could have on join times which could impact querying the data, we ultimately decided to stick with a single table for products.
+
+For a full breakdown of the normalisation process, please see <a href="https://github.com/DELON8/group-5-data-engineering-final-project/blob/main/supplementary_documentation/data_normalisation.pdf">here for documentation<a>.
+
+
+### **Data Extraction**
+![DataInChecks drawio](https://user-images.githubusercontent.com/116560975/207384408-c7846e88-62be-4846-9258-e5805449943e.png)
 
 Although the CSV file we used for our POC had no headers, we thought about other cases that we could encounter that could potentially crash our app. For example:
 
@@ -138,11 +183,10 @@ Although the CSV file we used for our POC had no headers, we thought about other
 - We may receive a file with incorrect headers.
 
 After careful consideration, we came up with the following:
-As per the diagram below, if the number of columns or the headers are wrong, the extraction fails and the script outputs an error. 
-If the number of columns is right but there are no headers. The script outputs a warning, adds the headers and extracts the data and makes it available as a pandas dataframe.
-If the headers are present and correct, just extract the data and present it as a pandas dataframe.
+- If the number of columns the extraction fails and the script outputs an error. 
+- If the number of columns is right but there are no headers. The script outputs a warning, adds the headers and extracts the data and makes it available as a pandas dataframe.
+- If the headers are present and correct, just extract the data and present it as a pandas dataframe.
 
-![DataInChecks drawio](https://user-images.githubusercontent.com/116560975/207384408-c7846e88-62be-4846-9258-e5805449943e.png)
 
 Furthermore, seven unit tests have been developed to help minimize regression.
 
@@ -153,7 +197,7 @@ Furthermore, seven unit tests have been developed to help minimize regression.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Getting started
+## **Getting started**
 - Instruct the user on how to get their own version of our app set up, direct them to files they need to run, include screenshots, etc.
 
 ## Usage
