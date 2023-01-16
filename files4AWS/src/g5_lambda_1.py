@@ -1,38 +1,58 @@
+from datetime import date
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 
 import boto3
 import numpy as np
 import pandas as pd
 
-# import psycopg2
-# import psycopg2.extras as extras
-# from connect_to_db import connecting_to_db
+from connecting import connection
 
-
-bucket_name = "stackbucketg5"
+bucket_name = "delon8-group5"
 s3_client = boto3.client("s3", endpoint_url="https://s3.eu-west-1.amazonaws.com")
 
 
-def turn_file_into_dataframe(file_path: str, col_names: list) -> pd.DataFrame:
+def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
 
     """Take a CSV file with the right number of columns and returns a data frame"""
 
     try:
-        dataframe = pd.read_csv(Path(file_path), names=col_names)
-        return dataframe
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        df_s3_data = pd.read_csv(response["Body"], sep=",", names=col_names)
+        return df_s3_data
     except FileNotFoundError as e:
         print(f"There was no file at {file_path}")
         return e
 
 
-def format_timestamps(df: pd.DataFrame) -> pd.DataFrame:
+yesterday = datetime.now() - timedelta(1)
+yesterday = str(yesterday)[0:10]
+yesterday = yesterday.replace("-", "/")
+yesterday = yesterday.replace("/0", "/")
 
-    df["timestamp"] = pd.to_datetime(
-        df.timestamp
-    )  # this fills the column with timestamp object which did not work in the query
-    df["timestamp"] = df["timestamp"].astype(str)
 
-    return df
+def collect_names_of_files_in_bucket(bucket_name: str) -> list:
+    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
+    content_list = response["Contents"]
+    object_key_list = []
+    for s3_object in content_list:
+        object_key_list.append(s3_object["Key"])
+    print(f"You have collected these files: {object_key_list}")
+    return object_key_list
+
+
+def check_if_file_logged(object_key, connection):
+    recently_logged_files = get_recently_logged_files(connection)
+    return object_key in recently_logged_files
+
+
+def log_filename(object_key, connection_to_db):
+    query_to_insert_file_name = f"INSERT INTO public.file_log(file_name, time_logged) VALUES ('{object_key}', current_timestamp);"
+    cursor = connection_to_db.cursor()
+    cursor.execute(query_to_insert_file_name)
+    connection_to_db.commit()
+    print(f"File '{object_key}' has been processed")
 
 
 def remove_columns_from_df(
@@ -45,7 +65,8 @@ def remove_columns_from_df(
         dataframe.drop(columns_to_drop, axis=1, inplace=True)
         dataframe["timestamp"] = pd.to_datetime(dataframe["timestamp"])
         return dataframe
-    except:
+    except Exception as e:
+        print(e)
         print("dataframe does not contain specified columns")
 
 
@@ -100,16 +121,6 @@ def foreign_key_cols(dict, df, new_col, exist_col):
     return df
 
 
-def collect_names_of_files_in_bucket(bucket_name: str) -> list:
-    response = s3_client.list_objects_v2(Bucket=bucket_name)
-    content_list = response["Contents"]
-    object_key_list = []
-    for s3_object in content_list:
-        object_key_list.append(s3_object["Key"])
-    print(f"You have collected these files: {object_key_list}")
-    return object_key_list
-
-
 col_names = [
     "timestamp",
     "store_name",
@@ -120,18 +131,13 @@ col_names = [
     "card_number",
 ]
 
-file_path = "../data/chesterfield_25-08-2021_09-00-00.csv"
-
-to_drop = ["customer_name", "card_number"]
+columns_to_drop = ["customer_name", "card_number"]
 
 # Turning csv into df
-dataframe_file = turn_file_into_dataframe(file_path, col_names)
+dataframe_file = turn_file_into_dataframe(bucket_name, object_key, col_names)
 
 # Dropping privacy columns
-clean_df = remove_columns_from_df(dataframe_file, to_drop)
-
-# Changing format of timestamp
-clean_df = format_timestamps(clean_df)
+clean_df = remove_columns_from_df(dataframe_file, columns_to_drop)
 
 # Splitting products into individual columns
 clean_split_df = splitting_products_column(clean_df)
@@ -182,3 +188,4 @@ sales_table = foreign_key_cols(
 sales_table["customer_basket_id"] = sales_table.index + 1
 sales_table.drop(["product_name"], axis=1, inplace=True)
 sales_table = sales_table[["customer_basket_id", "product_id"]]
+sales_table = sales_table.convert_dtypes()
