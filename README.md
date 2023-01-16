@@ -170,7 +170,7 @@ We first needed took a look at a CSV from the company to decide on what tables w
 
 We discussed breaking down the products table further, into separate size, type and flavour columns, however after considering the impact such a breakdown could have on join times which could impact querying the data, we ultimately decided to stick with a single table for products.
 
-For a full breakdown of the normalisation process, please see <a href="https://github.com/DELON8/group-5-data-engineering-final-project/blob/main/supplementary_documentation/data_normalisation.pdf">here for documentation<a>.
+For a full breakdown of the normalisation process, please see <a href="https://github.com/DELON8/group-5-data-engineering-final-project/blob/main/supplementary_documentation/data_normalisation.pdf">here for documentation</a>.
 
 
 ### **Data Extraction**
