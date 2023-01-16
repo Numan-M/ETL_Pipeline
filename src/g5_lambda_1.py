@@ -21,13 +21,13 @@ def turn_file_into_dataframe(file_path: str, col_names: list) -> pd.DataFrame:
 
 
 def remove_columns_from_df(
-    dataframe: pd.DataFrame, columns_to_drop: list
+    dataframe: pd.DataFrame, columns_columns_to_drop: list
 ) -> pd.DataFrame:
 
     """Removes specified columns from a dataframe"""
 
     try:
-        dataframe.drop(columns_to_drop, axis=1, inplace=True)
+        dataframe.drop(columns_columns_to_drop, axis=1, inplace=True)
         dataframe["timestamp"] = pd.to_datetime(dataframe["timestamp"])
         return dataframe
     except:
@@ -97,13 +97,13 @@ col_names = [
 
 file_path = "../data/chesterfield_25-08-2021_09-00-00.csv"
 
-to_drop = ["customer_name", "card_number"]
+columns_to_drop = ["customer_name", "card_number"]
 
 # Turning csv into df
 dataframe_file = turn_file_into_dataframe(file_path, col_names)
 
 # Dropping privacy columns
-clean_df = remove_columns_from_df(dataframe_file, to_drop)
+clean_df = remove_columns_from_df(dataframe_file, columns_to_drop)
 
 # Splitting products into individual columns
 clean_split_df = splitting_products_column(clean_df)

@@ -9,18 +9,18 @@ def connect_to_database(connection):
     """
     try:
         print("connecting")
-        conn = psycopg2.connect(**connection)
+        connection = psycopg2.connect(**connection)
         print("done")
     except:
         print("not done")
-    return conn
+    return connection
 
 
-connection = {
+connection_details = {
     "database": "test",
     "user": "postgres",
     "password": "pass",
     "host": "localhost",
     "port": "5432",
 }
-connecting_to_db = connect_to_database(connection)
+connecting_to_db = connect_to_database(connection_details)
