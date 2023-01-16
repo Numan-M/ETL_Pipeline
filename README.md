@@ -9,7 +9,13 @@
       <a href="#project-background">Project Background</a>
       <ul>
         <li><a href="#design-choices">Design Choices</a></li>
-        <li><a href="#proof-of-concept">Proof of Concept</a></li>
+        <li>
+        <a href="#proof-of-concept">Proof of Concept</a>
+          <ul>
+            <li><a href="#setup-docker-for-postgresql-and-adminer">Setup docker for PostgreSQL and Adminer</a></li>
+          </ul>
+        <li><a href="">
+        </li>
       </ul>
     </li>
     <li><a href="#getting-started">Getting Started</a></li>
@@ -28,7 +34,6 @@
     <li><a href="#acknowledgments">Acknowledgments</a></li>
     <li></li>
     # Slot these in where appropriate
-    <li><a href="#create-a-docker-compose-yaml-file-for-a-postgresql-docker-container">Create a Docker Compose YAML File for a PostgreSQL Docker Container</a></li>
   </ol>
 </details>
 
@@ -54,59 +59,7 @@ Following discussion with the client, we agreed upon the following:
 
 ### Design Choices
 ### Proof of Concept
-
-- Describe tech stack here
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Getting started
-- Instruct the user on how to get their own version of our app set up, direct them to files they need to run, include screenshots, etc.
-
-## Usage
-- Describe what insights we can gain
-- Demo?
-- Demonstrate evidence of testing
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Development Roadmap
-### Week One - Setup basic ETL pipeline (Proof of concept)
-- [ ] Agree on ways of working
-- [ ] Definition of done
-- [ ] Create script to generate DB
-- [ ] Normalise data
-- [ ] Create schema for DB
-- [ ] Setup docker for PostgreSQL and Adminer
-- [ ] Extract data
-- [ ] Clean data
-- [ ] Load data to DB
-
-### Week Two - Move ETL pipeline to the cloud
-
-### Week Three - Setup Grafana
-
-### Future Plans
-- [ ] Break up Lambda function 
-- [ ] Separate the extract Lambda in the public subnet from the transform and load Lambda in the private subnet
-
-
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contributing
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contact
-- Links to our respective LinkedIns
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Acknowledgments
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Create a Docker Compose YAML File for a PostgreSQL Docker Container
+### Setup docker for PostgreSQL and Adminer
 Let’s create a directory, postgres, and then create a docker-compose.yml file in that directory:
 
 ```bash
@@ -169,6 +122,58 @@ docker-compose ps
 ![Screenshot 2022-12-07 at 19 31 47](https://user-images.githubusercontent.com/113560228/206277976-688302ec-2713-435a-9d34-8f911ed71819.png)
 
 This will show the name of the container, command, and state of the container, which shows, for example, that the container is running. It also shows port mapping.
+- Describe tech stack here
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Getting started
+- Instruct the user on how to get their own version of our app set up, direct them to files they need to run, include screenshots, etc.
+
+## Usage
+- Describe what insights we can gain
+- Demo?
+- Demonstrate evidence of testing
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Development Roadmap
+### Week One - Setup basic ETL pipeline (Proof of concept)
+- [ ] Agree on ways of working
+- [ ] Definition of done
+- [ ] Create script to generate DB
+- [ ] Normalise data
+- [ ] Create schema for DB
+- [ ] Setup docker for PostgreSQL and Adminer
+- [ ] Extract data
+- [ ] Clean data
+- [ ] Load data to DB
+
+### Week Two - Move ETL pipeline to the cloud
+
+### Week Three - Setup Grafana
+
+### Future Plans
+- [ ] Break up Lambda function 
+- [ ] Separate the extract Lambda in the public subnet from the transform and load Lambda in the private subnet
+
+
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Contributing
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Contact
+- Links to our respective LinkedIns
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Acknowledgments
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 
 ### Connect to the PostgreSQL Database Running in a Container
 
