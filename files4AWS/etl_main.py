@@ -10,13 +10,14 @@ from src.creating_tables import query_sales
 from src.creating_tables import query_store
 from src.g5_lambda_1 import bucket_name
 from src.g5_lambda_1 import collect_names_of_files_in_bucket
-from src.g5_lambda_1 import process_list_of_files
+from src.g5_lambda_1 import process_file_for_loading
 
 # from src.g5_lambda_1 import customer_basket_table
 # from src.g5_lambda_1 import payment_methods_table
 # from src.g5_lambda_1 import products_table
 # from src.g5_lambda_1 import sales_tablblee
 # from src.g5_lambda_1 import store_name_ta
+# from src.g5_lambda_1 import process_list_of_files
 
 
 connection_details = {
@@ -43,15 +44,10 @@ def handler(event, context):
         run_query(connection, query_customer_basket)
         run_query(connection, query_sales)
 
-        # run_query(connection, alter_customer_basket_storeid)
-        # run_query(connection, alter_customer_basket_paymentid)
-
-        # run_query(connection, alter_sales_customer_basket_id)
-        # run_query(connection, alter_sales_product_id)
-
-        list_of_file_names = collect_names_of_files_in_bucket(bucket_name)
-        dict_of_tables = process_list_of_files(list_of_file_names)
-        print(dict_of_tables)
+        # list_of_file_names = collect_names_of_files_in_bucket(bucket_name)
+        dict_of_tables = process_file_for_loading(object_key)
+        # dict_of_tables = process_list_of_files(list_of_file_names)
+        # print(dict_of_tables)
         # list of tables is a dictionary
         # {"customer_basket_table" : customer_basket_table, "payment_methods_table" : payment_methods_table,
         # "products_table" : products_table, "sales_table" : sales_table, "store_name_table" : store_name_table}
