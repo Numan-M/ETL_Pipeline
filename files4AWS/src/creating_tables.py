@@ -1,5 +1,4 @@
-# import redshift_connector
-# from src.connecting import connection
+# THIS FILE CONTAINS THE QUERIES USED TO CREATE THE TABLES
 
 
 create_transactions_table = """CREATE TABLE IF NOT EXISTS transactions2 (

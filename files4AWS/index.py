@@ -9,14 +9,9 @@ from src.creating_tables import query_products
 from src.creating_tables import query_sales
 from src.creating_tables import query_store
 from src.g5_lambda_1 import bucket_name
-from src.g5_lambda_1 import collect_names_of_files_in_bucket
 from src.g5_lambda_1 import process_file_for_loading
 
-# from src.g5_lambda_1 import customer_basket_table
-# from src.g5_lambda_1 import payment_methods_table
-# from src.g5_lambda_1 import products_table
-# from src.g5_lambda_1 import sales_tablblee
-# from src.g5_lambda_1 import store_name_ta
+# from src.g5_lambda_1 import collect_names_of_files_in_bucket
 # from src.g5_lambda_1 import process_list_of_files
 
 

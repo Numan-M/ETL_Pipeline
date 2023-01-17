@@ -9,8 +9,8 @@ import pandas as pd
 
 from src.connecting import connect_to_database
 
-bucket_name = "stackbucketg5"
-# bucket_name = "delon8-group5"
+# bucket_name = "stackbucketg5"
+bucket_name = "delon8-group5"
 s3_client = boto3.client("s3", endpoint_url="https://s3.eu-west-1.amazonaws.com")
 
 connection_details = {
@@ -101,14 +101,14 @@ def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame
         df_s3_data = pd.read_csv(response["Body"], sep=",", names=col_names)
         return df_s3_data
     except FileNotFoundError as e:
-        print(f"There was no file at {file_path}")
+        print(f"There was no file with the object key: {object_key}")
         return e
 
 
-yesterday = datetime.now() - timedelta(1)
-yesterday = str(yesterday)[0:10]
-yesterday = yesterday.replace("-", "/")
-yesterday = yesterday.replace("/0", "/")
+# yesterday = datetime.now() - timedelta(1)
+# yesterday = str(yesterday)[0:10]
+# yesterday = yesterday.replace("-", "/")
+# yesterday = yesterday.replace("/0", "/")
 
 
 # def collect_names_of_files_in_bucket(bucket_name: str) -> list:
@@ -125,26 +125,15 @@ yesterday = yesterday.replace("/0", "/")
 ###BELOW FOR TESTING PURPOSES ONLY, UNCOMMENT ONE ABOVE
 
 
-def collect_names_of_files_in_bucket(bucket_name: str) -> list:
-
-    # response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
-    # content_list = response["Contents"]
-    # object_key_list = []
-    # for s3_object in content_list:
-    #     object_key_list.append(s3_object["Key"])
-    # print(f"You have collected these files: {object_key_list}")
-    return ["shortmockFileNOHeaders17.csv"]
-
-
-# def get_recently_logged_files(connection):
-#     cursor = connection.cursor()
-#     query_to_get_files_from_last_minute = "SELECT * FROM  public.file_log WHERE time_logged >= GETDATE() - '20 minute'::INTERVAL;"
-#     cursor.execute(query_to_get_files_from_last_minute)
-#     result=(cursor.fetchall())
-#     list_of_file_processed_in_last_20min = []
-#     for row in result:
-#         list_of_file_processed_in_last_20min.append((row[0]))
-#     return list_of_file_processed_in_last_20min
+def get_recently_logged_files(connection):
+    cursor = connection.cursor()
+    query_to_get_files_from_last_minute = "SELECT * FROM  public.file_log WHERE time_logged >= GETDATE() - '20 minute'::INTERVAL;"
+    cursor.execute(query_to_get_files_from_last_minute)
+    result = cursor.fetchall()
+    list_of_file_processed_in_last_20min = []
+    for row in result:
+        list_of_file_processed_in_last_20min.append(row[0])
+    return list_of_file_processed_in_last_20min
 
 
 def check_if_file_logged(object_key, connection):
