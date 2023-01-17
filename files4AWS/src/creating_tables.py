@@ -34,6 +34,9 @@ query_sales = """CREATE TABLE IF NOT EXISTS sales(
     product_id INT not null
     );"""
 
+query_create_log_files = """CREATE TABLE IF NOT EXISTS file_log (
+    file_name VARCHAR(100) UNIQUE NOT NULL PRIMARY KEY, time_logged TIMESTAMP);"""
+
 
 alter_customer_basket_storeid = """ALTER TABLE customer_basket
                         ADD CONSTRAINT fk_customer_basket_store_id FOREIGN KEY(store_id) REFERENCES stores(store_id);"""

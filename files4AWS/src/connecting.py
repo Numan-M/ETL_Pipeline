@@ -7,6 +7,7 @@ def connect_to_database(connection_details):
     parameters to connect to the database.
     If successful it will return conn
     """
+
     try:
         print("connecting")
         connection = redshift_connector.connect(**connection_details)
