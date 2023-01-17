@@ -3,9 +3,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# import psycopg2
-# import psycopg2.extras as extras
-# from connect_to_db import connecting_to_db
+# from connecting import connecting_to_db
+# cursor = connecting_to_db.cursor()
+file_path = "data/London_25-08-2021_09-00-00.csv"
 
 
 def turn_file_into_dataframe(file_path: str, col_names: list) -> pd.DataFrame:
@@ -67,24 +67,6 @@ def splitting_products_column(df):
     return df
 
 
-def foreign_key_dict(df, col_name):
-    """This Function is creating a foreign key condition using exisitng column"""
-    increment = 1
-    foreign_key_dict = {}
-    for item in df[f"{col_name}"].unique():
-        foreign_key_dict.update({f"{item}": increment})
-        increment += 1
-    return foreign_key_dict
-
-
-def foreign_key_cols(dict, df, new_col, exist_col):
-    """This function is creating foreign key column"""
-    condition = {}
-    condition.update(dict)
-    df[new_col] = df[exist_col].map(condition)
-    return df
-
-
 col_names = [
     "timestamp",
     "store_name",
@@ -95,7 +77,6 @@ col_names = [
     "card_number",
 ]
 
-file_path = "../data/chesterfield_25-08-2021_09-00-00.csv"
 
 columns_to_drop = ["customer_name", "card_number"]
 
@@ -112,6 +93,11 @@ clean_split_df = splitting_products_column(clean_df)
 payment_methods_table = pd.DataFrame(
     clean_split_df["payment_method"].unique(), columns=["payment_method"]
 )
+payment_methods_table = payment_methods_table.assign(
+    payment_method_id=payment_methods_table.index
+)
+payment_methods_table = payment_methods_table[["payment_method_id", "payment_method"]]
+
 
 # # 2. Creating a store name df
 store_name_table = pd.DataFrame(
@@ -124,34 +110,24 @@ products_table = pd.DataFrame(
     columns=["product_name", "price"],
 )
 
+
 # 4. Creating a customer_basket_table
-store_FK = foreign_key_dict(clean_df, "store_name")
-payment_method_FK = foreign_key_dict(clean_df, "payment_method")
+
 customer_basket_table = pd.DataFrame(
     clean_df, columns=["timestamp", "store_name", "total_price", "payment_method"]
 )
-customer_basket_table = foreign_key_cols(
-    store_FK, customer_basket_table, "store_id", "store_name"
-)
-customer_basket_table = foreign_key_cols(
-    payment_method_FK, customer_basket_table, "payment_method_id", "payment_method"
-)
-customer_basket_table.drop(["store_name", "payment_method"], axis=1, inplace=True)
-customer_basket_table_cols = [
-    "store_id",
-    "payment_method_id",
-    "timestamp",
-    "total_price",
-]
-customer_basket_table = customer_basket_table[customer_basket_table_cols]
+# customer_basket_table = customer_basket_table.rename(columns={'store_name':'store_id','payment_method':'payment_method_id'})
+# 5.
+def retrieve_col_length(cursor, table):
+    cursor.execute(f"SELECT COUNT(*) FROM {table}")
+    count = cursor.fetchone()[0]
+    count_variable = int(count)
+    return count_variable
 
-# 5. Creating a sales df
-product_id_FK_condition = foreign_key_dict(clean_split_df, "product_name")
-sales_table = pd.DataFrame(clean_split_df, columns=["product_name"])
-sales_table = foreign_key_cols(
-    product_id_FK_condition, sales_table, "product_id", "product_name"
+
+sales_table = pd.DataFrame(
+    clean_split_df, columns=["customer_basket_id", "product_name"]
 )
 sales_table["customer_basket_id"] = sales_table.index + 1
-sales_table.drop(["product_name"], axis=1, inplace=True)
-sales_table = sales_table[["customer_basket_id", "product_id"]]
-sales_table = sales_table.convert_dtypes()
+# sales_table = sales_table.rename(columns={'product_name':'product_id'})
+# print(sales_table)

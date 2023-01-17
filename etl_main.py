@@ -3,10 +3,6 @@ import psycopg2
 import psycopg2.extras as extras
 
 from src.connecting import connecting_to_db
-from src.creating_tables import alter_customer_basket_paymentid
-from src.creating_tables import alter_customer_basket_storeid
-from src.creating_tables import alter_sales_customer_basket_id
-from src.creating_tables import alter_sales_product_id
 from src.creating_tables import query_customer_basket
 from src.creating_tables import query_payment
 from src.creating_tables import query_products
@@ -20,59 +16,75 @@ from src.g5_lambda_1 import store_name_table
 
 
 def main():
-    run_query(connecting_to_db, query_store)
-    run_query(connecting_to_db, query_payment)
-    run_query(connecting_to_db, query_products)
-    run_query(connecting_to_db, query_customer_basket)
-    run_query(connecting_to_db, query_sales)
+    cursor = connecting_to_db.cursor()
+    run_query(cursor, query_store)
+    run_query(cursor, query_payment)
+    run_query(cursor, query_products)
+    run_query(cursor, query_customer_basket)
+    run_query(cursor, query_sales)
+    insert_values_in_table(cursor, store_name_table, "stores")
+    #### CHANGE VAR NAME
+    cursor.execute(f"SELECT COUNT(*) FROM payment_methods")
+    count1 = cursor.fetchone()[0]
+    count_variable1 = int(count1)
+    payment_methods_table["payment_method_id"] += count_variable1
+    insert_values_in_table(cursor, payment_methods_table, "payment_methods")
 
-    run_query(connecting_to_db, alter_customer_basket_storeid)
-    run_query(connecting_to_db, alter_customer_basket_paymentid)
+    insert_values_in_table(cursor, products_table, "products")
 
-    run_query(connecting_to_db, alter_sales_customer_basket_id)
-    run_query(connecting_to_db, alter_sales_product_id)
+    cursor.execute(f"SELECT COUNT(*) FROM customer_basket")
+    count = cursor.fetchone()[0]
+    count_variable = int(count)
+    sales_table["customer_basket_id"] += count_variable
+    insert_values_in_table(cursor, sales_table, "sales")
+    insert_values_in_table(cursor, customer_basket_table, "customer_basket")
+    cursor.close()
+    connecting_to_db.close()
 
-    insert_values_in_table(connecting_to_db, store_name_table, "stores")
-    insert_values_in_table(connecting_to_db, payment_methods_table, "payment_methods")
-    insert_values_in_table(connecting_to_db, products_table, "products")
-    insert_values_in_table(connecting_to_db, customer_basket_table, "customer_basket")
-    insert_values_in_table(connecting_to_db, sales_table, "sales")
 
-
-def run_query(conn, query):
+def run_query(cursor, query):
     try:
 
-        cursor = conn.cursor()
-
         cursor.execute(query)
-        print(f"Successfully run query: {query} ")
+        connecting_to_db.commit()
+        print(f"Successfully ran query: {query} ")
     except (Exception, psycopg2.DatabaseError) as error:
         print(f"Following query failed {query}")
         print(error)
 
 
-def insert_values_in_table(connection, df, table_used):
-    """Loading data into DB"""
+# def insert_values_in_table(connection, df, table_used):
+#     """Loading data into DB"""
 
-    tuples = [tuple(x) for x in df.to_numpy()]
+#     tuples = [tuple(x) for x in df.to_numpy()]
 
-    columns = ",".join(list(df.columns))
+#     columns = ",".join(list(df.columns))
 
-    query = f"INSERT INTO {table_used}({columns}) VALUES %s"
-    """--> INSERT INTO payment_methods(payment_method) VALUES ('CARD'),..."""
+#     query = f"INSERT INTO {table_used}({columns}) VALUES %s"
+#     """--> INSERT INTO payment_methods(payment_method) VALUES ('CARD'),..."""
+#     cursor = connection.cursor()
+#     try:
+#         extras.execute_values(cursor, query, tuples)
 
-    cursor = connection.cursor()
-    try:
-        extras.execute_values(cursor, query, tuples)
+#         connection.commit()
+#         print("the dataframe is inserted")
+#     except (Exception, psycopg2.DatabaseError) as error:
+#         print(error)
 
-        connection.commit()
-        print("the dataframe is inserted")
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+# finally:
 
-    finally:
-
-        connection.close()
+#     connection.close()
+def insert_values_in_table(cursor, df: pd.DataFrame, table_name: str):
+    cols = ", ".join(df.columns)
+    asterisk = ", ".join(["%s"] * len(df.columns))
+    query = (
+        f"INSERT INTO {table_name}({cols}) VALUES ({asterisk}) ON CONFLICT DO NOTHING"
+    )
+    for index, row in df.iterrows():
+        values = tuple(row)
+        cursor.execute(query, values)
+    connecting_to_db.commit()
+    return
 
 
 if __name__ == "__main__":

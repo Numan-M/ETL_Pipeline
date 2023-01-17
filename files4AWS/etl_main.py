@@ -2,11 +2,6 @@ import pandas as pd
 import psycopg2
 import psycopg2.extras as extras
 
-from src.cleansing_data import basket_table
-from src.cleansing_data import payment_methods_table
-from src.cleansing_data import products_table
-from src.cleansing_data import store_table
-from src.cleansing_data import transaction_table
 from src.connecting import connecting_to_db
 from src.creating_tables import alter_transaction_paymentid
 from src.creating_tables import alter_transaction_storeid
@@ -15,6 +10,11 @@ from src.creating_tables import query_products
 from src.creating_tables import query_store
 from src.creating_tables import script_payment
 from src.creating_tables import transaction
+from src.g5_lambda_1 import basket_table
+from src.g5_lambda_1 import payment_methods_table
+from src.g5_lambda_1 import products_table
+from src.g5_lambda_1 import store_table
+from src.g5_lambda_1 import transaction_table
 
 
 def main():
