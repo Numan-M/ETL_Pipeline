@@ -39,21 +39,15 @@ def handler(event, context):
         run_query(connection, query_customer_basket)
         run_query(connection, query_sales)
 
-        # list_of_file_names = collect_names_of_files_in_bucket(bucket_name)
+        """This processes a file for loading (takes the CSV, cleans it,
+        formats it and makes it into dataframes, each to be uploaded to a table)"""
         dict_of_tables = process_file_for_loading(object_key)
-        # dict_of_tables = process_list_of_files(list_of_file_names)
-        # print(dict_of_tables)
-        # list of tables is a dictionary
-        # {"customer_basket_table" : customer_basket_table, "payment_methods_table" : payment_methods_table,
-        # "products_table" : products_table, "sales_table" : sales_table, "store_name_table" : store_name_table}
 
         insert_values_in_table(connection, dict_of_tables["store_name_table"], "stores")
         insert_values_in_table(
             connection, dict_of_tables["payment_methods_table"], "payment_methods"
         )
-        print("NEXT TRIES TO INSERT PRODUCTS TABLE")
         insert_values_in_table(connection, dict_of_tables["products_table"], "products")
-        print("NEXT TRIES TO INSERT CUSTOMER BASKET TABLE")
         insert_values_in_table(
             connection, dict_of_tables["customer_basket_table"], "customer_basket"
         )
@@ -62,6 +56,7 @@ def handler(event, context):
         connection.close()
 
     def run_query(connection, query):
+
         try:
             cursor = connection.cursor()
             cursor.execute(query)
