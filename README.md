@@ -173,9 +173,6 @@ Now, we can go to our browser and go to localhost:8080 for Adminer. As Adminer r
 ![Screenshot 2022-12-07 at 19 41 37](https://user-images.githubusercontent.com/113560228/206280979-f1cfb886-e6a9-458e-abff-f5fd53bb4f9c.png)
 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 ### **Data Extraction**
 ![DataInChecks drawio](https://user-images.githubusercontent.com/116560975/207384408-c7846e88-62be-4846-9258-e5805449943e.png)
 
