@@ -133,7 +133,7 @@ def collect_names_of_files_in_bucket(bucket_name: str) -> list:
     # for s3_object in content_list:
     #     object_key_list.append(s3_object["Key"])
     # print(f"You have collected these files: {object_key_list}")
-    return [""]
+    return ["shortmockFileNOHeaders17.csv"]
 
 
 def get_recently_logged_files(connection):
@@ -196,6 +196,9 @@ def process_list_of_files(list_of_file_names):
 
             # Dropping privacy columns
             clean_df = remove_columns_from_df(dataframe_file, columns_to_drop)
+
+            # Turning the timestamp into a string which works
+            clean_df["timestamp"] = clean_df["timestamp"].astype(str)
 
             # Splitting products into individual columns
             clean_split_df = splitting_products_column(clean_df)
