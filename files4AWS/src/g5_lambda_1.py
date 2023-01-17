@@ -7,16 +7,24 @@ import boto3
 import numpy as np
 import pandas as pd
 
-from connecting import connection
+from src.connecting import connect_to_database
 
-bucket_name = "delon8-group5"
+bucket_name = "stackbucketg5"
+# bucket_name = "delon8-group5"
 s3_client = boto3.client("s3", endpoint_url="https://s3.eu-west-1.amazonaws.com")
+
+connection_details = {
+    "database": "group5_cafe",
+    "user": "group5",
+    "password": "Redshift-delon8-group5-76sdhghs",
+    "host": "redshiftcluster-bie5pcqdgojl.cje2eu9tzolt.eu-west-1.redshift.amazonaws.com",
+    "port": 5439,
+}
 
 
 def remove_columns_from_df(
     dataframe: pd.DataFrame, columns_to_drop: list
 ) -> pd.DataFrame:
-    print("DHFDHJKFJDFHJDFHD remove_columns_from_df")
 
     """Removes specified columns from a dataframe"""
 
@@ -30,7 +38,6 @@ def remove_columns_from_df(
 
 
 def splitting_products_column(df):
-    print("DHFDHJKFJDFHJDFHD splitting_products_column")
 
     """Cleansing products column"""
 
@@ -64,7 +71,6 @@ def splitting_products_column(df):
 
 
 def foreign_key_dict(df, col_name):
-    print("DHFDHJKFJDFHJDFHD foreign_key_dict")
     """This Function is creating a foreign key condition using exisitng column"""
     increment = 1
     foreign_key_dict = {}
@@ -105,16 +111,29 @@ yesterday = yesterday.replace("-", "/")
 yesterday = yesterday.replace("/0", "/")
 
 
-def collect_names_of_files_in_bucket(bucket_name: str) -> list:
-    print("DHFDHJKFJDFHJDFHD collect_names_of_files_in_bucket")
+# def collect_names_of_files_in_bucket(bucket_name: str) -> list:
 
-    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
-    content_list = response["Contents"]
-    object_key_list = []
-    for s3_object in content_list:
-        object_key_list.append(s3_object["Key"])
-    print(f"You have collected these files: {object_key_list}")
-    return object_key_list
+#     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
+#     content_list = response["Contents"]
+#     object_key_list = []
+#     for s3_object in content_list:
+#         object_key_list.append(s3_object["Key"])
+#     print(f"You have collected these files: {object_key_list}")
+#     return object_key_list
+
+
+###BELOW FOR TESTING PURPOSES ONLY, UNCOMMENT ONE ABOVE
+
+
+def collect_names_of_files_in_bucket(bucket_name: str) -> list:
+
+    # response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
+    # content_list = response["Contents"]
+    # object_key_list = []
+    # for s3_object in content_list:
+    #     object_key_list.append(s3_object["Key"])
+    # print(f"You have collected these files: {object_key_list}")
+    return [""]
 
 
 def get_recently_logged_files(connection):
@@ -129,7 +148,6 @@ def get_recently_logged_files(connection):
 
 
 def check_if_file_logged(object_key, connection):
-    print("DHFDHJKFJDFHJDFHD check_if_file_logged")
     try:
         recently_logged_files = get_recently_logged_files(connection)
         return object_key in recently_logged_files
@@ -137,11 +155,11 @@ def check_if_file_logged(object_key, connection):
         print(error)
 
 
-def log_filename(object_key, connection_to_db):
+def log_filename(object_key, connection):
     query_to_insert_file_name = f"INSERT INTO public.file_log(file_name, time_logged) VALUES ('{object_key}', current_timestamp);"
-    cursor = connection_to_db.cursor()
+    cursor = connection.cursor()
     cursor.execute(query_to_insert_file_name)
-    connection_to_db.commit()
+    connection.commit()
     print(f"File '{object_key}' has been processed")
 
 
@@ -167,6 +185,7 @@ columns_to_drop = ["customer_name", "card_number"]
 
 
 def process_list_of_files(list_of_file_names):
+    connection = connect_to_database(connection_details)
     for object_key in list_of_file_names:
         if check_if_file_logged(object_key, connection) == False:
 
@@ -242,3 +261,4 @@ def process_list_of_files(list_of_file_names):
                 "sales_table": sales_table,
                 "store_name_table": store_name_table,
             }
+    connection.close()

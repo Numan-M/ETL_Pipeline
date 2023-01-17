@@ -26,4 +26,4 @@ connection_details = {
     "port": 5439,
 }
 
-connection = connect_to_database(connection_details)
+# connection = connect_to_database(connection_details)
