@@ -1,0 +1,32 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  
+permissions:  #<--- ADD A PERMISSIONS BLOCK
+  id-token: write
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  list-s3: #rename this
+    name: delon8-group5
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: eu-west-1
+    
+    steps:
+      - name: Configure AWS credentials #<--- USE THIS STEP TO ASSUME THE NECESSARY AWS ROLE
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-deploy-role
+          aws-region: eu-west-1 #<--- Hardcode region
+          role-duration-seconds: 1200
+
+      - name: List S3 buckets to test credentials
+        run: aws s3 ls delon8-group5
