@@ -75,15 +75,3 @@ query_sales = """CREATE TABLE IF NOT EXISTS sales(
 
 query_create_log_files = """CREATE TABLE IF NOT EXISTS file_log (
     file_name VARCHAR(100) UNIQUE NOT NULL PRIMARY KEY, time_logged TIMESTAMP);"""
-
-
-# alter_customer_basket_storeid = """ALTER TABLE customer_basket
-#                         ADD CONSTRAINT fk_customer_basket_store_id FOREIGN KEY(store_id) REFERENCES stores(store_id);"""
-
-# alter_customer_basket_paymentid = """ALTER TABLE customer_basket
-#                         ADD CONSTRAINT fk_customer_basket_payment_method_id FOREIGN KEY(payment_method_id) REFERENCES payment_methods(payment_method_id);"""
-
-# alter_sales_customer_basket_id = """ALTER TABLE sales
-#                         ADD CONSTRAINT fk_sales_customer_basket_id FOREIGN KEY(customer_basket_id) REFERENCES customer_basket(customer_basket_id);"""
-# alter_sales_product_id = """ALTER TABLE sales
-#                        ADD CONSTRAINT fk_sales_product_id FOREIGN KEY(product_id) REFERENCES products(product_id);"""
