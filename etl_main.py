@@ -2,25 +2,27 @@ import pandas as pd
 import psycopg2
 import psycopg2.extras as extras
 
-from src.connecting import connecting_to_db
-from src.creating_tables import query_customer_basket
+from src.connecting import connect_to_database
+from src.connecting import connection_details
 from src.creating_tables import query_payment
 from src.creating_tables import query_products
 from src.creating_tables import query_sales
 from src.creating_tables import query_store
-from src.g5_lambda_1 import customer_basket_table
+from src.creating_tables import query_transactions
 from src.g5_lambda_1 import payment_methods_table
 from src.g5_lambda_1 import products_table
 from src.g5_lambda_1 import sales_table
 from src.g5_lambda_1 import store_name_table
+from src.g5_lambda_1 import transactions_table
 
 
 def main():
+    connecting_to_db = connect_to_database(connection_details)
     cursor = connecting_to_db.cursor()
     run_query(cursor, query_store)
     run_query(cursor, query_payment)
     run_query(cursor, query_products)
-    run_query(cursor, query_customer_basket)
+    run_query(cursor, query_transactions)
     run_query(cursor, query_sales)
     insert_values_in_table(cursor, store_name_table, "stores")
     #### CHANGE VAR NAME
@@ -32,12 +34,12 @@ def main():
 
     insert_values_in_table(cursor, products_table, "products")
 
-    cursor.execute(f"SELECT COUNT(*) FROM customer_basket")
+    cursor.execute(f"SELECT COUNT(*) FROM transactions")
     count = cursor.fetchone()[0]
     count_variable = int(count)
-    sales_table["customer_basket_id"] += count_variable
+    sales_table["transaction_id"] += count_variable
     insert_values_in_table(cursor, sales_table, "sales")
-    insert_values_in_table(cursor, customer_basket_table, "customer_basket")
+    insert_values_in_table(cursor, transactions_table, "transactions")
     cursor.close()
     connecting_to_db.close()
 
@@ -47,7 +49,7 @@ def run_query(cursor, query):
 
         cursor.execute(query)
         connecting_to_db.commit()
-        print(f"Successfully ran query: {query} ")
+        print(f"Successfully ran query")
     except (Exception, psycopg2.DatabaseError) as error:
         print(f"Following query failed {query}")
         print(error)

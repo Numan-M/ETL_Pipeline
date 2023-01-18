@@ -111,12 +111,12 @@ products_table = pd.DataFrame(
 )
 
 
-# 4. Creating a customer_basket_table
+# 4. Creating a transactions_table
 
-customer_basket_table = pd.DataFrame(
+transactions_table = pd.DataFrame(
     clean_df, columns=["timestamp", "store_name", "total_price", "payment_method"]
 )
-# customer_basket_table = customer_basket_table.rename(columns={'store_name':'store_id','payment_method':'payment_method_id'})
+# transactions_table = transactions_table.rename(columns={'store_name':'store_id','payment_method':'payment_method_id'})
 # 5.
 def retrieve_col_length(cursor, table):
     cursor.execute(f"SELECT COUNT(*) FROM {table}")
@@ -125,9 +125,7 @@ def retrieve_col_length(cursor, table):
     return count_variable
 
 
-sales_table = pd.DataFrame(
-    clean_split_df, columns=["customer_basket_id", "product_name"]
-)
-sales_table["customer_basket_id"] = sales_table.index + 1
+sales_table = pd.DataFrame(clean_split_df, columns=["transaction_id", "product_name"])
+sales_table["transaction_id"] = sales_table.index + 1
 # sales_table = sales_table.rename(columns={'product_name':'product_id'})
 # print(sales_table)
