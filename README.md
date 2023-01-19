@@ -98,7 +98,8 @@ We discussed breaking down the products table further, into separate size, type 
 For a full breakdown of the normalisation process, please see <a href="https://github.com/DELON8/group-5-data-engineering-final-project/blob/main/supplementary_documentation/data_normalisation.pdf">here for documentation</a>.
 
 With the data normalised, we were then able to design our schema. 
-[final-schema](https://user-images.githubusercontent.com/116800613/213325530-d6d0646a-058b-4f1d-9206-85cd0263bfa6.png)
+![Final Schema](https://user-images.githubusercontent.com/116800613/213326064-a9672af7-8e2a-4011-b455-18baea46e145.png)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
