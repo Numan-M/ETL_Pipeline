@@ -1,13 +1,13 @@
-from datetime import date
-from datetime import datetime
-from datetime import timedelta
-from pathlib import Path
-
+# from datetime import date
+# from datetime import datetime
+# from datetime import timedelta
+# from pathlib import Path
 import boto3
-import numpy as np
 import pandas as pd
 
 from src.connecting import connect_to_database
+
+# import numpy as np
 
 # bucket_name = "stackbucketg5"
 bucket_name = "delon8-group5"
@@ -20,6 +20,19 @@ connection_details = {
     "host": "redshiftcluster-bie5pcqdgojl.cje2eu9tzolt.eu-west-1.redshift.amazonaws.com",
     "port": 5439,
 }
+
+
+def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
+
+    """Take a CSV file with the right number of columns and returns a data frame"""
+
+    try:
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        df_s3_data = pd.read_csv(response["Body"], sep=",", names=col_names)
+        return df_s3_data
+    except FileNotFoundError as e:
+        print(f"There was no file with the object key: {object_key}")
+        return e
 
 
 def remove_columns_from_df(
@@ -70,89 +83,15 @@ def splitting_products_column(df):
     return df
 
 
-def foreign_key_dict(df, col_name):
-    """This Function is creating a foreign key condition using exisitng column"""
-    increment = 1
-    foreign_key_dict = {}
-    for item in df[f"{col_name}"].unique():
-        foreign_key_dict.update({f"{item}": increment})
-        increment += 1
-    return foreign_key_dict
-
-
-def foreign_key_cols(dict, df, new_col, exist_col):
-
-    """This function is creating foreign key column"""
-    condition = {}
-    condition.update(dict)
-    df[new_col] = df[exist_col].map(condition)
-    return df
-
-
-##ADDED BY ARAM
-
-
-def turn_file_into_dataframe(bucket_name, object_key, col_names) -> pd.DataFrame:
-
-    """Take a CSV file with the right number of columns and returns a data frame"""
-
-    try:
-        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-        df_s3_data = pd.read_csv(response["Body"], sep=",", names=col_names)
-        return df_s3_data
-    except FileNotFoundError as e:
-        print(f"There was no file with the object key: {object_key}")
-        return e
-
-
-# yesterday = datetime.now() - timedelta(1)
-# yesterday = str(yesterday)[0:10]
-# yesterday = yesterday.replace("-", "/")
-# yesterday = yesterday.replace("/0", "/")
-
-
-# def collect_names_of_files_in_bucket(bucket_name: str) -> list:
-
-#     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=yesterday)
-#     content_list = response["Contents"]
-#     object_key_list = []
-#     for s3_object in content_list:
-#         object_key_list.append(s3_object["Key"])
-#     print(f"You have collected these files: {object_key_list}")
-#     return object_key_list
-
-
-###BELOW FOR TESTING PURPOSES ONLY, UNCOMMENT ONE ABOVE
-
-
-def get_recently_logged_files(connection):
-    cursor = connection.cursor()
-    query_to_get_files_from_last_minute = "SELECT * FROM  public.file_log WHERE time_logged >= GETDATE() - '20 minute'::INTERVAL;"
-    cursor.execute(query_to_get_files_from_last_minute)
+def get_values_already_present(cursor, table_name, value):
+    query_to_get_already_inserted_values = f"SELECT {value} FROM  public.{table_name};"
+    cursor.execute(query_to_get_already_inserted_values)
     result = cursor.fetchall()
-    list_of_file_processed_in_last_20min = []
+    list_of_inserted_values = []
     for row in result:
-        list_of_file_processed_in_last_20min.append(row[0])
-    return list_of_file_processed_in_last_20min
+        list_of_inserted_values.append(row[0])
+    return list_of_inserted_values
 
-
-def check_if_file_logged(object_key, connection):
-    try:
-        recently_logged_files = get_recently_logged_files(connection)
-        return object_key in recently_logged_files
-    except Exception as error:
-        print(error)
-
-
-def log_filename(object_key, connection):
-    query_to_insert_file_name = f"INSERT INTO public.file_log(file_name, time_logged) VALUES ('{object_key}', current_timestamp);"
-    cursor = connection.cursor()
-    cursor.execute(query_to_insert_file_name)
-    connection.commit()
-    print(f"File '{object_key}' has been processed")
-
-
-##FINISH ADDED BY ARAM
 
 col_names = [
     "timestamp",
@@ -173,150 +112,53 @@ columns_to_drop = ["customer_name", "card_number"]
 # Check if the files in the list files are already logged
 
 
-def process_file_for_loading(object_key):
-    connection = connect_to_database(connection_details)
+def process_file_for_loading(object_key, cursor):
 
-    if check_if_file_logged(object_key, connection) == False:
+    # Turning csv into df
+    dataframe_file = turn_file_into_dataframe(bucket_name, object_key, col_names)
 
-        # Turning csv into df
-        dataframe_file = turn_file_into_dataframe(bucket_name, object_key, col_names)
+    # Dropping privacy columns
+    clean_df = remove_columns_from_df(dataframe_file, columns_to_drop)
 
-        # Dropping privacy columns
-        clean_df = remove_columns_from_df(dataframe_file, columns_to_drop)
+    # Turning the timestamp into a string which is needed by redshift
+    clean_df["timestamp"] = clean_df["timestamp"].astype(str)
 
-        # Turning the timestamp into a string which works
-        clean_df["timestamp"] = clean_df["timestamp"].astype(str)
+    # Splitting products into individual columns
+    clean_split_df = splitting_products_column(clean_df)
 
-        # Splitting products into individual columns
-        clean_split_df = splitting_products_column(clean_df)
+    # 1. Creating a payment method df
+    payment_methods_table = pd.DataFrame(
+        clean_split_df["payment_method"].unique(), columns=["payment_method"]
+    )
 
-        # 1. Creating a payment method df
-        payment_methods_table = pd.DataFrame(
-            clean_split_df["payment_method"].unique(), columns=["payment_method"]
-        )
+    # # 2. Creating a store name df
+    store_name_table = pd.DataFrame(
+        clean_split_df["store_name"].unique(), columns=["store_name"]
+    )
 
-        # # 2. Creating a store name df
-        store_name_table = pd.DataFrame(
-            clean_split_df["store_name"].unique(), columns=["store_name"]
-        )
+    # 3. Creating a product df
+    products_table = pd.DataFrame(
+        clean_split_df[["product_name", "price"]].drop_duplicates(),
+        columns=["product_name", "price"],
+    )
 
-        # 3. Creating a product df
-        products_table = pd.DataFrame(
-            clean_split_df[["product_name", "price"]].drop_duplicates(),
-            columns=["product_name", "price"],
-        )
+    # 4. Creating a transactions_table
 
-        # 4. Creating a customer_basket_table
-        store_FK = foreign_key_dict(clean_df, "store_name")
-        payment_method_FK = foreign_key_dict(clean_df, "payment_method")
-        customer_basket_table = pd.DataFrame(
-            clean_df,
-            columns=["timestamp", "store_name", "total_price", "payment_method"],
-        )
-        customer_basket_table = foreign_key_cols(
-            store_FK, customer_basket_table, "store_id", "store_name"
-        )
-        customer_basket_table = foreign_key_cols(
-            payment_method_FK,
-            customer_basket_table,
-            "payment_method_id",
-            "payment_method",
-        )
-        customer_basket_table.drop(
-            ["store_name", "payment_method"], axis=1, inplace=True
-        )
-        customer_basket_table_cols = [
-            "store_id",
-            "payment_method_id",
-            "timestamp",
-            "total_price",
-        ]
-        customer_basket_table = customer_basket_table[customer_basket_table_cols]
+    transactions_table = pd.DataFrame(
+        clean_df[["timestamp", "store_name", "total_price", "payment_method"]],
+        columns=["timestamp", "store_name", "total_price", "payment_method"],
+    )
 
-        # 5. Creating a sales df
-        product_id_FK_condition = foreign_key_dict(clean_split_df, "product_name")
-        sales_table = pd.DataFrame(clean_split_df, columns=["product_name"])
-        sales_table = foreign_key_cols(
-            product_id_FK_condition, sales_table, "product_id", "product_name"
-        )
-        sales_table["customer_basket_id"] = sales_table.index + 1
-        sales_table.drop(["product_name"], axis=1, inplace=True)
-        sales_table = sales_table[["customer_basket_id", "product_id"]]
-        sales_table = sales_table.convert_dtypes()
+    # 5. Creating a sales df
+    sales_table = pd.DataFrame(
+        clean_split_df, columns=["transaction_id", "product_name"]
+    )
+    sales_table["transaction_id"] = sales_table.index + 1
 
-        return {
-            "customer_basket_table": customer_basket_table,
-            "payment_methods_table": payment_methods_table,
-            "products_table": products_table,
-            "sales_table": sales_table,
-            "store_name_table": store_name_table,
-        }
-
-    # def process_list_of_files(list_of_file_names):
-    #     connection = connect_to_database(connection_details)
-    #     for object_key in list_of_file_names:
-    #         if check_if_file_logged(object_key, connection) == False:
-
-    #             # Turning csv into df
-    #             dataframe_file = turn_file_into_dataframe(bucket_name, object_key, col_names)
-
-    #             # Dropping privacy columns
-    #             clean_df = remove_columns_from_df(dataframe_file, columns_to_drop)
-
-    #             # Turning the timestamp into a string which works
-    #             clean_df['timestamp'] = clean_df['timestamp'].astype(str)
-
-    #             # Splitting products into individual columns
-    #             clean_split_df = splitting_products_column(clean_df)
-
-    #             # 1. Creating a payment method df
-    #             payment_methods_table = pd.DataFrame(
-    #                 clean_split_df["payment_method"].unique(), columns=["payment_method"]
-    #             )
-
-    #             # # 2. Creating a store name df
-    #             store_name_table = pd.DataFrame(
-    #                 clean_split_df["store_name"].unique(), columns=["store_name"]
-    #             )
-
-    #             # 3. Creating a product df
-    #             products_table = pd.DataFrame(
-    #                 clean_split_df[["product_name", "price"]].drop_duplicates(),
-    #                 columns=["product_name", "price"],
-    #             )
-
-    #             # 4. Creating a customer_basket_table
-    #             store_FK = foreign_key_dict(clean_df, "store_name")
-    #             payment_method_FK = foreign_key_dict(clean_df, "payment_method")
-    #             customer_basket_table = pd.DataFrame(
-    #                 clean_df, columns=["timestamp", "store_name", "total_price", "payment_method"]
-    #             )
-    #             customer_basket_table = foreign_key_cols(
-    #                 store_FK, customer_basket_table, "store_id", "store_name"
-    #             )
-    #             customer_basket_table = foreign_key_cols(
-    #                 payment_method_FK, customer_basket_table, "payment_method_id", "payment_method"
-    #             )
-    #             customer_basket_table.drop(["store_name", "payment_method"], axis=1, inplace=True)
-    #             customer_basket_table_cols = [
-    #                 "store_id",
-    #                 "payment_method_id",
-    #                 "timestamp",
-    #                 "total_price",
-    #             ]
-    #             customer_basket_table = customer_basket_table[customer_basket_table_cols]
-
-    #             # 5. Creating a sales df
-    #             product_id_FK_condition = foreign_key_dict(clean_split_df, "product_name")
-    #             sales_table = pd.DataFrame(clean_split_df, columns=["product_name"])
-    #             sales_table = foreign_key_cols(
-    #                 product_id_FK_condition, sales_table, "product_id", "product_name"
-    #             )
-    #             sales_table["customer_basket_id"] = sales_table.index + 1
-    #             sales_table.drop(["product_name"], axis=1, inplace=True)
-    #             sales_table = sales_table[["customer_basket_id", "product_id"]]
-    #             sales_table = sales_table.convert_dtypes()
-
-    #             return {"customer_basket_table" : customer_basket_table, "payment_methods_table" : payment_methods_table,
-    #             "products_table" : products_table, "sales_table" : sales_table, "store_name_table" : store_name_table}
-    connection.close()
+    return {
+        "transactions_table": transactions_table,
+        "payment_methods_table": payment_methods_table,
+        "products_table": products_table,
+        "sales_table": sales_table,
+        "store_name_table": store_name_table,
+    }
