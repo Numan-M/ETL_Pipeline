@@ -86,8 +86,8 @@ We first needed took a look at a CSV from the company to decide on what tables w
   | ----------- | ----------- | ----------- |
   | 1 | Regular Latte | 2.45|
   | 2 | Large Flavoured Latte - Hazelnut | 2.75|
-- **Baskets** 
-  | basket_id* | *transaction_id* | *product_id* |
+- **Sales** 
+  | sales_id* | *transaction_id* | *product_id* |
   | ----------- | ----------- | ----------- |
   | 1 | 1 | 1|
   | 2 | 2 | 1 |
@@ -98,7 +98,7 @@ We discussed breaking down the products table further, into separate size, type 
 For a full breakdown of the normalisation process, please see <a href="https://github.com/DELON8/group-5-data-engineering-final-project/blob/main/supplementary_documentation/data_normalisation.pdf">here for documentation</a>.
 
 With the data normalised, we were then able to design our schema. 
---insert image of schema
+[final-schema](https://user-images.githubusercontent.com/116800613/213325530-d6d0646a-058b-4f1d-9206-85cd0263bfa6.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
