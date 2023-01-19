@@ -23,15 +23,12 @@ def turn_file_into_dataframe(file_path: str, col_names: list) -> pd.DataFrame:
 def remove_columns_from_df(
     dataframe: pd.DataFrame, columns_columns_to_drop: list
 ) -> pd.DataFrame:
-
-    """Removes specified columns from a dataframe"""
-
     try:
         dataframe.drop(columns_columns_to_drop, axis=1, inplace=True)
         dataframe["timestamp"] = pd.to_datetime(dataframe["timestamp"])
-        return dataframe
     except:
         print("dataframe does not contain specified columns")
+    return dataframe
 
 
 def splitting_products_column(df):

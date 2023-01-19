@@ -11,8 +11,9 @@ def connect_to_database(connection):
         print("connecting")
         connection = psycopg2.connect(**connection)
         print("done")
-    except:
+    except psycopg2.OperationalError as e:
         print("not done")
+        raise e
     return connection
 
 
