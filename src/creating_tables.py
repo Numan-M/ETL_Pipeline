@@ -26,15 +26,16 @@ query_products = """CREATE TABLE IF NOT EXISTS products(
     price NUMERIC(5,2) NOT NULL
     );"""
 
+
 query_transactions = """CREATE TABLE IF NOT EXISTS transactions(
     transaction_id SERIAL PRIMARY KEY not NULL,
-    store_id INT not null,
-    payment_method_id INT not null,
     timestamp timestamp not null,
+    store_id INT NOT NULL,
     total_price NUMERIC(5,2) not null,
+    payment_method_id INT NOT NULL,
     CONSTRAINT fk_stores
         FOREIGN KEY(store_id)
-            REFERENCES stores(store_id)
+            REFERENCES stores(store_id),
     CONSTRAINT fk_payment_methods
         FOREIGN KEY(payment_method_id)
             REFERENCES payment_methods(payment_method_id)
@@ -46,7 +47,7 @@ query_sales = """CREATE TABLE IF NOT EXISTS sales(
     product_id INT not null,
     CONSTRAINT fk_sales_transaction_id
         FOREIGN KEY(transaction_id)
-            REFERENCES transactions(transaction_id)
+            REFERENCES transactions(transaction_id),
     CONSTRAINT fk_sales_product_id
         FOREIGN KEY(product_id)
             REFERENCES products(product_id)

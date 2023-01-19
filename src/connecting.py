@@ -23,4 +23,4 @@ connection_details = {
     "host": "localhost",
     "port": "5432",
 }
-# connecting_to_db = connect_to_database(connection_details)
+connecting_to_db = connect_to_database(connection_details)
