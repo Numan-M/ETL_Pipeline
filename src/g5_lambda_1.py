@@ -5,7 +5,7 @@ import pandas as pd
 
 # from connecting import connecting_to_db
 # cursor = connecting_to_db.cursor()
-file_path = "data/London_25-08-2021_09-00-00.csv"
+file_path = "data/chesterfield_25-08-2021_09-00-00.csv"
 
 
 def turn_file_into_dataframe(file_path: str, col_names: list) -> pd.DataFrame:
@@ -90,10 +90,6 @@ clean_split_df = splitting_products_column(clean_df)
 payment_methods_table = pd.DataFrame(
     clean_split_df["payment_method"].unique(), columns=["payment_method"]
 )
-payment_methods_table = payment_methods_table.assign(
-    payment_method_id=payment_methods_table.index
-)
-payment_methods_table = payment_methods_table[["payment_method_id", "payment_method"]]
 
 
 # # 2. Creating a store name df
@@ -108,12 +104,13 @@ products_table = pd.DataFrame(
 )
 
 
-# 4. Creating a customer_basket_table
+# 4. Creating a transactions_table
 
-customer_basket_table = pd.DataFrame(
-    clean_df, columns=["timestamp", "store_name", "total_price", "payment_method"]
+transactions_table = pd.DataFrame(
+    clean_df[["timestamp", "store_name", "total_price", "payment_method"]],
+    columns=["timestamp", "store_name", "total_price", "payment_method"],
 )
-# customer_basket_table = customer_basket_table.rename(columns={'store_name':'store_id','payment_method':'payment_method_id'})
+
 # 5.
 def retrieve_col_length(cursor, table):
     cursor.execute(f"SELECT COUNT(*) FROM {table}")
@@ -122,9 +119,7 @@ def retrieve_col_length(cursor, table):
     return count_variable
 
 
-sales_table = pd.DataFrame(
-    clean_split_df, columns=["customer_basket_id", "product_name"]
-)
-sales_table["customer_basket_id"] = sales_table.index + 1
-# sales_table = sales_table.rename(columns={'product_name':'product_id'})
+sales_table = pd.DataFrame(clean_split_df, columns=["transaction_id", "product_name"])
+sales_table["transaction_id"] = sales_table.index + 1
+
 # print(sales_table)
