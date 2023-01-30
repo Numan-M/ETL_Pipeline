@@ -4,3 +4,4 @@ venv/
 .pytest_cache/
 .git/
 src/__pycash__
+.gitignore
