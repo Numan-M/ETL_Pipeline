@@ -1,3 +1,6 @@
-__pycash__
+__pycash__/
 venv/
 .venv/
+.pytest_cache/
+.git/
+src/__pycash__
