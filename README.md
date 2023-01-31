@@ -242,13 +242,7 @@ Furthermore, seven unit tests have been developed to help minimize regression.
 
 ## **Contributing**
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## **Contact**
-- Links to our respective LinkedIns
+https://www.linkedin.com/in/numan-mahmood-197951242/
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## **Acknowledgments**
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
